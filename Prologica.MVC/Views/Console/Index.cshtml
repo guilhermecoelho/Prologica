@@ -9,44 +9,40 @@
     <script src="~/lib/knockout/build/output/knockout-latest.js"></script>
 </head>
 <body>
-    <form>
-        <table>
-            <tr>
-                <td>
-                    <table id="tbldml">
-                        <tr>
-                            <td>Name</td>
-                            <td><input type="text" id="txtName" data-bind="value: Name" /></td>
-                        </tr>
-                        <tr>
-                            <td><button data-bind="click: save">Save</button></td>
-                        </tr>
-                    </table>
-                </td>
-                <td>
-                    <div class="FixedContainer">
-                        <table style="border: double">
-                            <thead>
-                                <tr>
-                                    <td data-bind="value: Id">ID</td>
-                                    <td data-bind="value: Name">Name</td>
-                                    <td></td>
-                                </tr>
-                            </thead>
-                            <!--Itera através de um observableArray usando foreach-->
-                            <tbody data-bind="foreach: Consoles">
-                                <tr style="border: solid">
-                                    <td data-bind="text: id"></td>
-                                    <td data-bind="text: name"></td>
-                                    <td><button>Delete</button></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </td>
-            </tr>
+    <table>
+        <tr>
+            <td>
+                <table id="tbldml" class="table">
+                    <tr>
+                        <td>Name</td>
+                        <td><input type="text" id="txtName" data-bind="value: Name" /></td>
+                    </tr>
+                    <tr>
+                        <td><button data-bind="click: save">Save</button></td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+    <div class="FixedContainer">
+        <table class="table table-striped">
+            <thead class="thead-dark">
+                <tr>
+                    <td scope="col" data-bind="value: Id">ID</td>
+                    <td scope="col" data-bind="value: Name">Name</td>
+                    <td></td>
+                </tr>
+            </thead>
+            <!--Itera através de um observableArray usando foreach-->
+            <tbody data-bind="foreach: Consoles">
+                <tr>
+                    <td data-bind="text: id"></td>
+                    <td data-bind="text: name"></td>
+                    <td><button data-bind="click:  $parent.delete">Delete</button></td>
+                </tr>
+            </tbody>
         </table>
-    </form>
+    </div>
 </body>
 
 <script type="text/javascript">
@@ -58,18 +54,16 @@
 
         self.Consoles = ko.observableArray([]);
 
-        GetConsoles(); 
+        GetConsoles();
 
-        //Função para realizar o POSt
         self.save = function () {
             var consoleData = {
                 name: self.Name(),
             };
-            //Chamada Ajax para inserir um funcionario
             $.ajax({
                 type: "POST",
                 url: "https://localhost:44300/console",
-                data: ko.toJSON(consoleData), 
+                data: ko.toJSON(consoleData),
                 contentType: "application/json",
                 success: function (data) {
                     alert("Console Added");
@@ -81,7 +75,20 @@
                     alert("Falhou");
                 }
             });
-            //fim
+        };
+
+        self.delete = function (consoleModel) {
+            $.ajax({
+                type: "DELETE",
+                url: "https://localhost:44300/console/" + consoleModel.id,
+                success: function (data) {
+                    alert("Registro deletado com sucesso");
+                    GetConsoles();
+                },
+                error: function (error) {
+                    alert(error.status + "<--and--> " + error.statusText);
+                }
+            });
         };
 
         // self.update = function () {
@@ -102,33 +109,15 @@
         //     });
         // };
 
-        // //Função para realizar a operação de DELETE
-        // self.deleterec = function (_funcionario) {
-        //     $.ajax({
-        //         type: "DELETE",
-        //         url: "/api/Funcionario/" + _funcionario.funcionarioid,
-        //         success: function (data) {
-        //             alert("Registro deletado com sucesso");
-        //             GetFuncionarios();//Refresh the Table
-        //         },
-        //         error: function (error) {
-        //             alert(error.status + "<--and--> " + error.statusText);
-        //         }
-        //     });
-        //     alert("Selecionado :" + _funcionario.funcionarioid)
-        // };
-
-        //Função para ler todos os  Funcionarios
         function GetConsoles() {
-            // chamara Ajax para pegar todos os funcionarios
             $.ajax({
                 type: "GET",
                 url: "https://localhost:44300/console",
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 success: function (data) {
-                    
-                    self.Consoles(data); //Poe a resposta no ObservableArray
+
+                    self.Consoles(data);
                 },
                 error: function (error) {
                     alert(error.status + "<--and--> " + error.statusText);
@@ -136,17 +125,6 @@
             });
             //fim
         }
-
-        // //Função para exibir o registro atualizado
-        // self.getselected_funcionario = function (_funcionario) {
-        //     self.ID(_funcionario.ID),
-        //         self.Nome(_funcionario.Nome),
-        //         self.Titulo(_funcionario.Titulo),
-        //         self.Nascimento(_funcionario.Nascimento),
-        //         self.EstadoCivil(_funcionario.EstadoCivil),
-        //         self.Sexo(_funcionario.Sexo),
-        //         self.Admissao(_funcionario.Admissao)
-        // };
     };
     ko.applyBindings(new ConsoleViewModel());
 </script>
