@@ -1,0 +1,27 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+<div class="text-center">
+    <h1 class="display-4">Welcome</h1>
+    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+
+    <span> Código do Aluno:</span><span data-bind="text: Numero"></span>
+    <br />
+    <span>Sobrenome:</span><input data-bind="value: Sobrenome" />
+    <span>Nome:</span><input data-bind="value: Nome" />
+</div>
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="~/js/site.js" asp-append-version="true"></script>
+<script src="~/lib/knockout/knockout-3.5.1.js"></script>
+<script type="text/javascript">
+    var aluno = {
+        Numero: "A003456",
+        Sobrenome: "Macoratti",
+        Nome: "Jose Carlos"
+    }
+    // ativa knockout.js
+    ko.applyBindings(aluno);
+
+</script>
