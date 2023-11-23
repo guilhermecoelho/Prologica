@@ -6,7 +6,7 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
-    <script src="~/lib/knockout/knockout-3.5.1.js"></script>
+    <script src="~/lib/knockout/build/output/knockout-latest.js"></script>
 </head>
 <body>
     <form>
@@ -53,13 +53,12 @@
     var ConsoleViewModel = function () {
         var self = this;
 
-
         self.Id = ko.observable("0");
         self.Name = ko.observable("");
 
         self.Consoles = ko.observableArray([]);
 
-        GetConsoles(); //Chama a função que pega os registros usando uma chamada Ajax
+        GetConsoles(); 
 
         //Função para realizar o POSt
         self.save = function () {
@@ -73,7 +72,6 @@
                 data: ko.toJSON(consoleData), 
                 contentType: "application/json",
                 success: function (data) {
-                    debugger
                     alert("Console Added");
                     self.Id(data.Id);
                     alert("Console Id :" + self.Id());
