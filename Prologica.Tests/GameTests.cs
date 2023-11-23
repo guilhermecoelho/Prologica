@@ -9,39 +9,40 @@ using dalModels = Prologica.DAL.imports;
 
 namespace Prologica.Tests
 {
-    public class ConsoleTests
+    public class GameTests
     {
         private readonly IMapper mapper;
                  
-        private readonly IConsoleRepository _consoleRepository;
-        private readonly ConsoleServices _consoleServices;
+        private readonly IGameRepository _gameRepository;
+        private readonly GameServices _gameServices;
 
-        public ConsoleTests()
+        public GameTests()
         {
             mapper = new MapperConfiguration(cfg =>
             {
-                cfg.CreateMap<apiModels.Console, dalModels.Console>();
+                cfg.CreateMap<apiModels.Game, dalModels.Game>();
                 cfg.CreateMap<apiModels.Game, dalModels.Game>();
             }
             ).CreateMapper();
 
-            _consoleRepository = Substitute.For<IConsoleRepository>();
+            _gameRepository = Substitute.For<IGameRepository>();
 
-            _consoleServices = new ConsoleServices(_consoleRepository, new ConsoleValidator(), mapper);
+            _gameServices = new GameServices(_gameRepository, new GameValidator(), mapper);
         }
 
         [Fact]
         public async Task Add()
         {
             //Arrange
-            var request = new apiModels.Console
+            var request = new apiModels.Game
             {
-                Name = "console 1"
+                Name = "game 1",
+                ConsoleId = 1
             };
-             _consoleRepository.Add(Arg.Any<dalModels.Console>()).Returns(new dalModels.Console { Name = request.Name, Id = 1 });
+             _gameRepository.Add(Arg.Any<dalModels.Game>()).Returns(new dalModels.Game { Name = request.Name, Id = 1 });
 
             //Act
-            var result = await _consoleServices.Add(request);
+            var result = await _gameServices.Add(request);
 
             //Assert
             var resultObject = new OkObjectResult(result);
@@ -54,13 +55,13 @@ namespace Prologica.Tests
         {
             //Arrange
 
-            var request = new apiModels.Console
+            var request = new apiModels.Game
             {
                 Name = ""
             };
 
             //Act
-            var result = await _consoleServices.Add(request);
+            var result = await _gameServices.Add(request);
 
             //Assert
             var resultObject = new UnprocessableEntityObjectResult(result);
@@ -72,15 +73,16 @@ namespace Prologica.Tests
         public async Task Update()
         {
             //Arrange
-            var request = new apiModels.Console
+            var request = new apiModels.Game
             {
                 Id = 1,
-                Name = "console 1"
+                ConsoleId = 1,
+                Name = "game 1"
             };
-            _consoleRepository.Add(Arg.Any<dalModels.Console>()).Returns(new dalModels.Console { Name = request.Name, Id = 1 });
+            _gameRepository.Add(Arg.Any<dalModels.Game>()).Returns(new dalModels.Game { Name = request.Name, Id = 1 });
 
             //Act
-            var result = await _consoleServices.Update(request);
+            var result = await _gameServices.Update(request);
 
             //Assert
             var resultObject = new OkObjectResult(result);
@@ -93,13 +95,13 @@ namespace Prologica.Tests
         {
             //Arrange
 
-            var request = new apiModels.Console
+            var request = new apiModels.Game
             {
                 Name = ""
             };
 
             //Act
-            var result = await _consoleServices.Update(request);
+            var result = await _gameServices.Update(request);
 
             //Assert
             var resultObject = new UnprocessableEntityObjectResult(result);
