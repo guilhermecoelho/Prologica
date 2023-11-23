@@ -1,0 +1,156 @@
+﻿@{
+    ViewData["Title"] = "Consoles";
+}
+
+<head>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/lib/knockout/knockout-3.5.1.js"></script>
+</head>
+<body>
+    <form>
+        <table>
+            <tr>
+                <td>
+                    <table id="tbldml">
+                        <tr>
+                            <td>Name</td>
+                            <td><input type="text" id="txtName" data-bind="value: Name" /></td>
+                        </tr>
+                        <tr>
+                            <td><button data-bind="click: save">Save</button></td>
+                        </tr>
+                    </table>
+                </td>
+                <td>
+                    <div class="FixedContainer">
+                        <table style="border: double">
+                            <thead>
+                                <tr>
+                                    <td data-bind="value: Id">ID</td>
+                                    <td data-bind="value: Name">Name</td>
+                                    <td></td>
+                                </tr>
+                            </thead>
+                            <!--Itera através de um observableArray usando foreach-->
+                            <tbody data-bind="foreach: Consoles">
+                                <tr style="border: solid">
+                                    <td data-bind="text: id"></td>
+                                    <td data-bind="text: name"></td>
+                                    <td><button>Delete</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </form>
+</body>
+
+<script type="text/javascript">
+    var ConsoleViewModel = function () {
+        var self = this;
+
+
+        self.Id = ko.observable("0");
+        self.Name = ko.observable("");
+
+        self.Consoles = ko.observableArray([]);
+
+        GetConsoles(); //Chama a função que pega os registros usando uma chamada Ajax
+
+        //Função para realizar o POSt
+        self.save = function () {
+            var consoleData = {
+                name: self.Name(),
+            };
+            //Chamada Ajax para inserir um funcionario
+            $.ajax({
+                type: "POST",
+                url: "https://localhost:44300/console",
+                data: ko.toJSON(consoleData), 
+                contentType: "application/json",
+                success: function (data) {
+                    debugger
+                    alert("Console Added");
+                    self.Id(data.Id);
+                    alert("Console Id :" + self.Id());
+                    GetConsoles();
+                },
+                error: function () {
+                    alert("Falhou");
+                }
+            });
+            //fim
+        };
+
+        // self.update = function () {
+        //     var url = "/api/Funcionario/" + self.funcionarioid();
+        //     alert(url);
+        //     $.ajax({
+        //         type: "PUT",
+        //         url: url,
+        //         data: ko.toJSON(FunciDados),
+        //         contentType: "application/json",
+        //         success: function (data) {
+        //             alert("Registro atualizado com sucesso.");
+        //             GetFuncionarios();
+        //         },
+        //         error: function (error) {
+        //             alert(error.status + "<!----!>" + error.statusText);
+        //         }
+        //     });
+        // };
+
+        // //Função para realizar a operação de DELETE
+        // self.deleterec = function (_funcionario) {
+        //     $.ajax({
+        //         type: "DELETE",
+        //         url: "/api/Funcionario/" + _funcionario.funcionarioid,
+        //         success: function (data) {
+        //             alert("Registro deletado com sucesso");
+        //             GetFuncionarios();//Refresh the Table
+        //         },
+        //         error: function (error) {
+        //             alert(error.status + "<--and--> " + error.statusText);
+        //         }
+        //     });
+        //     alert("Selecionado :" + _funcionario.funcionarioid)
+        // };
+
+        //Função para ler todos os  Funcionarios
+        function GetConsoles() {
+            // chamara Ajax para pegar todos os funcionarios
+            $.ajax({
+                type: "GET",
+                url: "https://localhost:44300/console",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (data) {
+                    
+                    self.Consoles(data); //Poe a resposta no ObservableArray
+                },
+                error: function (error) {
+                    alert(error.status + "<--and--> " + error.statusText);
+                }
+            });
+            //fim
+        }
+
+        // //Função para exibir o registro atualizado
+        // self.getselected_funcionario = function (_funcionario) {
+        //     self.ID(_funcionario.ID),
+        //         self.Nome(_funcionario.Nome),
+        //         self.Titulo(_funcionario.Titulo),
+        //         self.Nascimento(_funcionario.Nascimento),
+        //         self.EstadoCivil(_funcionario.EstadoCivil),
+        //         self.Sexo(_funcionario.Sexo),
+        //         self.Admissao(_funcionario.Admissao)
+        // };
+    };
+    ko.applyBindings(new ConsoleViewModel());
+</script>
+
+
