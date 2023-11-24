@@ -7,23 +7,24 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="~/lib/knockout/build/output/knockout-latest.js"></script>
+    <script src="~/lib/sweetalert2/dist/sweetalert2.all.min.js"></script>
 </head>
 <body>
-    <table>
+    <button type="button" class="btn btn-success" data-bind="click: showForm">Add</button>
+    <table id="addTable" style="display:none">
         <tr>
             <td>
                 <table id="tbldml" class="table">
                     <tr>
                         <td>Name</td>
-                        <td><input type="text" id="txtName" data-bind="value: Name" /></td>
-                    </tr>
-                    <tr>
-                        <td><button data-bind="click: save">Save</button></td>
+                        <td><input type="text" class="form-control"  id="txtName" data-bind="value: Name" /></td>
+                        <td><button type="button" class="btn btn-primary" data-bind="click: save">Confirm</button></td>
                     </tr>
                 </table>
             </td>
         </tr>
     </table>
+
     <div class="FixedContainer">
         <table class="table table-striped">
             <thead class="thead-dark">
@@ -33,12 +34,12 @@
                     <td></td>
                 </tr>
             </thead>
-            <!--Itera através de um observableArray usando foreach-->
             <tbody data-bind="foreach: Consoles">
                 <tr>
                     <td data-bind="text: id"></td>
                     <td data-bind="text: name"></td>
-                    <td><button data-bind="click:  $parent.delete">Delete</button></td>
+                    <td><button type="button" class="btn btn-success" data-bind="click:  $parent.update">Update</button></td>
+                    <td><button type="button" class="btn btn-danger" data-bind="click:  $parent.delete">Delete</button></td>
                 </tr>
             </tbody>
         </table>
@@ -56,6 +57,10 @@
 
         GetConsoles();
 
+        self.showForm = function(){
+            $('#addTable').toggle();
+        }
+
         self.save = function () {
             var consoleData = {
                 name: self.Name(),
@@ -66,48 +71,100 @@
                 data: ko.toJSON(consoleData),
                 contentType: "application/json",
                 success: function (data) {
-                    alert("Console Added");
-                    self.Id(data.Id);
-                    alert("Console Id :" + self.Id());
+                    Swal.fire({
+                        title: "Good job!",
+                        text: "Console added!",
+                        icon: "success"
+                    });
                     GetConsoles();
                 },
-                error: function () {
-                    alert("Falhou");
+                error: function (data) {
+                    Swal.fire({
+                        title: "Error!",
+                        text: data.responseJSON.Name,
+                        icon: "error"
+                    });
                 }
             });
+        };
+
+        self.update = function (consoleModel) {
+
+            var name = consoleModel.name;
+
+            Swal.fire({
+                title: 'Update Console',
+                html:'<input id="name" class="swal2-input"  value =' + name + '>',
+
+                preConfirm: function () {
+                    return new Promise(function (resolve) {
+                        resolve([
+                            consoleModel.id,
+                            $('#name').val()
+                        ])
+                    })
+                },
+            }).then(function (result) {
+                var consoleData = {
+                    id: result.value[0],
+                    name: result.value[1],
+                };
+                $.ajax({
+                    type: "PUT",
+                    url: "https://localhost:44300/console",
+                    data: ko.toJSON(consoleData),
+                    contentType: "application/json",
+                    success: function (data) {
+                        Swal.fire({
+                            title: "Good job!",
+                            text: "Console updated!",
+                            icon: "success"
+                        });
+                        GetConsoles();
+                    },
+                    error: function (data) {
+                        Swal.fire({
+                            title: "Error!",
+                            text: data.responseJSON.Name,
+                            icon: "error"
+                        });
+                    }
+                });
+            })
         };
 
         self.delete = function (consoleModel) {
-            $.ajax({
-                type: "DELETE",
-                url: "https://localhost:44300/console/" + consoleModel.id,
-                success: function (data) {
-                    alert("Registro deletado com sucesso");
-                    GetConsoles();
-                },
-                error: function (error) {
-                    alert(error.status + "<--and--> " + error.statusText);
+
+            Swal.fire({
+                title: "Do you really want delete?",
+                icon: "warning",
+                showDenyButton: true,
+                confirmButtonText: "Yes",
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        type: "DELETE",
+                        url: "https://localhost:44300/console/" + consoleModel.id,
+                        success: function (data) {
+                            Swal.fire({
+                                title: "Good job!",
+                                text: "Console removed!",
+                                icon: "success"
+                            });
+                            GetConsoles();
+                        },
+                        error: function (error) {
+                            Swal.fire({
+                                title: "Error!",
+                                text: error,
+                                icon: "error"
+                            });
+                        }
+                    });
                 }
             });
         };
 
-        // self.update = function () {
-        //     var url = "/api/Funcionario/" + self.funcionarioid();
-        //     alert(url);
-        //     $.ajax({
-        //         type: "PUT",
-        //         url: url,
-        //         data: ko.toJSON(FunciDados),
-        //         contentType: "application/json",
-        //         success: function (data) {
-        //             alert("Registro atualizado com sucesso.");
-        //             GetFuncionarios();
-        //         },
-        //         error: function (error) {
-        //             alert(error.status + "<!----!>" + error.statusText);
-        //         }
-        //     });
-        // };
 
         function GetConsoles() {
             $.ajax({
@@ -116,14 +173,16 @@
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 success: function (data) {
-
                     self.Consoles(data);
                 },
                 error: function (error) {
-                    alert(error.status + "<--and--> " + error.statusText);
+                    Swal.fire({
+                        title: "Error!",
+                        text: error,
+                        icon: "error"
+                    });
                 }
             });
-            //fim
         }
     };
     ko.applyBindings(new ConsoleViewModel());

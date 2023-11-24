@@ -9,6 +9,10 @@
     {
       "library": "knockout@3.5.1",
       "destination": "wwwroot/lib/knockout/"
+    },
+    {
+      "library": "sweetalert2@11.10.1",
+      "destination": "wwwroot/lib/sweetalert2/"
     }
   ]
 }
