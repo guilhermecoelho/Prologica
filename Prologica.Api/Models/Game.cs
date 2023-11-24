@@ -11,6 +11,8 @@ namespace Prologica.Api.Models
         public string Name { get; set; } = null!;
 
         public double? Price { get; set; }
+
+        public Console? Console {get;set;}
     }
 
     public class GameValidator : AbstractValidator<Game>

@@ -31,7 +31,7 @@ namespace Prologica.DAL.Repositories
             return await _db.Set<T>().AsNoTracking().ToListAsync();
         }
 
-        public async Task<T> GetById(int id)
+        public virtual async Task<T> GetById(int id)
         {
             return await _db.Set<T>().FindAsync(id);
         }

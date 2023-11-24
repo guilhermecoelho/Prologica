@@ -12,4 +12,6 @@ public partial class Game
     public string Name { get; set; } = null!;
 
     public double? Price { get; set; }
+
+    public Console? Console { get; set; }
 }
