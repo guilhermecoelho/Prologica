@@ -17,7 +17,8 @@
             <td>
                 <table id="tbldml" class="table">
                     <tr>
-                        <td><select data-bind="options: consoles, optionsValue: 'id', optionsText: 'name', value: selectedOption"></select></td>
+                        <td>Console</td>
+                        <td><select class="form-select" data-bind="options: consoles, optionsValue: 'id', optionsText: 'name', value: selectedOption"></select></td>
                         <td>Name</td>
                         <td><input type="text" class="form-control" id="txtName" data-bind="value: Name" /></td>
                         <td>Price</td>
@@ -110,8 +111,8 @@
             var consoleId = gameModel.consoleId;
             var consoles = self.consoles();
 
-            var select = "<select name='consoles' id='consoles'>";
-            
+            var select = "<select class='form-select' name='consoles' id='consoles'>";
+
             consoles.forEach(function (c) {
                 var option;
                 if (c.id === consoleId) {
@@ -121,12 +122,12 @@
                 }
                 select += option;
             })
-            
+
             Swal.fire({
                 title: 'Update Game',
-                html: '<p>Name <input id="name" class="swal2-input"  value =' + name + '></p>' +
-                    '<p>Price <input id="price" class="swal2-input" value =' + price + '></p>' +
-                    '<p>' + select + '</select></p>',
+                html: '<p>Console' + select + '</select></p>' +
+                    '<p>Name <input id="name" class="swal2-input"  value =' + name + '></p>' +
+                    '<p>Price <input id="price" class="swal2-input" value =' + price + '></p>',
 
                 preConfirm: function () {
                     return new Promise(function (resolve) {
