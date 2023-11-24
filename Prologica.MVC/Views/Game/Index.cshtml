@@ -31,6 +31,7 @@
                 <tr>
                     <td scope="col" data-bind="value: Id">ID</td>
                     <td scope="col" data-bind="value: Name">Name</td>
+                    <td scope="col" data-bind="value: Console.Name">Console</td>
                     <td></td>
                 </tr>
             </thead>
@@ -38,6 +39,7 @@
                 <tr>
                     <td data-bind="text: id"></td>
                     <td data-bind="text: name"></td>
+                    <td data-bind="text: console.game"></td>
                     <td><button type="button" class="btn btn-success" data-bind="click:  $parent.update">Update</button></td>
                     <td><button type="button" class="btn btn-danger" data-bind="click:  $parent.delete">Delete</button></td>
                 </tr>
@@ -51,7 +53,10 @@
         var self = this;
 
         self.Id = ko.observable("0");
+        self.ConsoleId = ko.observable("");
         self.Name = ko.observable("");
+        self.Price = ko.observable("");
+        self.Console = ko.observable("");
 
         self.Games = ko.observableArray([]);
 
@@ -173,6 +178,7 @@
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 success: function (data) {
+                    debugger
                     self.Games(data);
                 },
                 error: function (error) {

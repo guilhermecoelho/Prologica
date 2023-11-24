@@ -39,10 +39,14 @@ builder.Services.AddScoped<IValidator<apiModels.Game>, GameValidator>();
 IMapper mapper = new MapperConfiguration(cfg =>
 {
     cfg.CreateMap<apiModels.Console, dalModels.Console>();
+    cfg.CreateMap<dalModels.Console, apiModels.Console>();
     cfg.CreateMap<apiModels.Game, dalModels.Game>();
+    cfg.CreateMap<dalModels.Game, apiModels.Game>()
+    .ForMember(dest => dest.ConsoleName, opt => opt.MapFrom(src => src.Console.Name));
 }
 ).CreateMapper();
 builder.Services.AddSingleton(mapper);
+
 
 //Start
 var app = builder.Build();

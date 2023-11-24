@@ -12,6 +12,7 @@ namespace Prologica.Api.Models
 
         public double? Price { get; set; }
 
+        public string ConsoleName { get; set; } = null!;
         public Console? Console {get;set;}
     }
 

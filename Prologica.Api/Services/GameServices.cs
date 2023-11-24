@@ -43,11 +43,17 @@ namespace Prologica.Api.Services
             return Results.Ok(result);
         }
 
-        public async Task<IResult> GetAll() =>
-            Results.Ok(await _GameRepository.GetAll());
+        public async Task<IResult> GetAll()
+        {
+            var resultDal = await _GameRepository.GetAll();
+            return Results.Ok(_mapper.Map<IEnumerable<apiModels.Game>>(resultDal));
+        }
 
-        public async Task<IResult> GetById(int id) =>
-           Results.Ok(await _GameRepository.GetById(id));
+        public async Task<IResult> GetById(int id)
+        {
+            var resultDal = await _GameRepository.GetById(id);
+            return Results.Ok(_mapper.Map<apiModels.Game>(resultDal));
+        }
 
         public async Task<IResult> Delete(int id)
         {
