@@ -11,13 +11,17 @@
 </head>
 <body>
     <button type="button" class="btn btn-success" data-bind="click: showForm">Add</button>
+
     <table id="addTable" style="display:none">
         <tr>
             <td>
                 <table id="tbldml" class="table">
                     <tr>
+                        <td><select data-bind="options: consoles, optionsValue: 'id', optionsText: 'name', value: selectedOption"></select></td>
                         <td>Name</td>
                         <td><input type="text" class="form-control" id="txtName" data-bind="value: Name" /></td>
+                        <td>Price</td>
+                        <td><input type="number" class="form-control" id="txtPrice" data-bind="value: Price" /></td>
                         <td><button type="button" class="btn btn-primary" data-bind="click: save">Confirm</button></td>
                     </tr>
                 </table>
@@ -31,7 +35,8 @@
                 <tr>
                     <td scope="col" data-bind="value: Id">ID</td>
                     <td scope="col" data-bind="value: Name">Name</td>
-                    <td scope="col" data-bind="value: Console.Name">Console</td>
+                    <td scope="col" data-bind="value: ConsoleName">Console</td>
+                    <td scope="col" data-bind="value: Price">Price</td>
                     <td></td>
                 </tr>
             </thead>
@@ -39,7 +44,8 @@
                 <tr>
                     <td data-bind="text: id"></td>
                     <td data-bind="text: name"></td>
-                    <td data-bind="text: console.game"></td>
+                    <td data-bind="text: consoleName"></td>
+                    <td data-bind="text: price"></td>
                     <td><button type="button" class="btn btn-success" data-bind="click:  $parent.update">Update</button></td>
                     <td><button type="button" class="btn btn-danger" data-bind="click:  $parent.delete">Delete</button></td>
                 </tr>
@@ -57,6 +63,7 @@
         self.Name = ko.observable("");
         self.Price = ko.observable("");
         self.Console = ko.observable("");
+        self.ConsoleName = ko.observable("");
 
         self.Games = ko.observableArray([]);
 
@@ -69,19 +76,22 @@
         self.save = function () {
             var consoleData = {
                 name: self.Name(),
+                price: self.Price(),
+                consoleId: self.selectedOption()
             };
             $.ajax({
                 type: "POST",
-                url: "https://localhost:44300/console",
+                url: "https://localhost:44300/game",
                 data: ko.toJSON(consoleData),
                 contentType: "application/json",
                 success: function (data) {
                     Swal.fire({
                         title: "Good job!",
-                        text: "Console added!",
+                        text: "Game added!",
                         icon: "success"
                     });
                     GetGames();
+                    self.showForm();
                 },
                 error: function (data) {
                     Swal.fire({
@@ -93,19 +103,38 @@
             });
         };
 
-        self.update = function (consoleModel) {
+        self.update = function (gameModel) {
 
-            var name = consoleModel.name;
+            var name = gameModel.name;
+            var price = gameModel.price;
+            var consoleId = gameModel.consoleId;
+            var consoles = self.consoles();
 
+            var select = "<select name='consoles' id='consoles'>";
+            
+            consoles.forEach(function (c) {
+                var option;
+                if (c.id === consoleId) {
+                    option = '<option value="' + c.id + '" selected>' + c.name + '</option>';
+                } else {
+                    var option = '<option value="' + c.id + '">' + c.name + '</option>';
+                }
+                select += option;
+            })
+            
             Swal.fire({
-                title: 'Update Console',
-                html: '<input id="name" class="swal2-input"  value =' + name + '>',
+                title: 'Update Game',
+                html: '<p>Name <input id="name" class="swal2-input"  value =' + name + '></p>' +
+                    '<p>Price <input id="price" class="swal2-input" value =' + price + '></p>' +
+                    '<p>' + select + '</select></p>',
 
                 preConfirm: function () {
                     return new Promise(function (resolve) {
                         resolve([
-                            consoleModel.id,
-                            $('#name').val()
+                            gameModel.id,
+                            $('#name').val(),
+                            $('#price').val(),
+                            $('#consoles').find(":selected").val()
                         ])
                     })
                 },
@@ -113,10 +142,12 @@
                 var consoleData = {
                     id: result.value[0],
                     name: result.value[1],
+                    price: result.value[2],
+                    consoleId: result.value[3]
                 };
                 $.ajax({
                     type: "PUT",
-                    url: "https://localhost:44300/console",
+                    url: "https://localhost:44300/game",
                     data: ko.toJSON(consoleData),
                     contentType: "application/json",
                     success: function (data) {
@@ -125,7 +156,7 @@
                             text: "Console updated!",
                             icon: "success"
                         });
-                        GetConsoles();
+                        GetGames();
                     },
                     error: function (data) {
                         Swal.fire({
@@ -138,7 +169,7 @@
             })
         };
 
-        self.delete = function (consoleModel) {
+        self.delete = function (gameModel) {
 
             Swal.fire({
                 title: "Do you really want delete?",
@@ -149,14 +180,14 @@
                 if (result.isConfirmed) {
                     $.ajax({
                         type: "DELETE",
-                        url: "https://localhost:44300/console/" + consoleModel.id,
+                        url: "https://localhost:44300/game/" + gameModel.id,
                         success: function (data) {
                             Swal.fire({
                                 title: "Good job!",
                                 text: "Console removed!",
                                 icon: "success"
                             });
-                            GetConsoles();
+                            GetGames();
                         },
                         error: function (error) {
                             Swal.fire({
@@ -178,7 +209,6 @@
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 success: function (data) {
-                    debugger
                     self.Games(data);
                 },
                 error: function (error) {
@@ -187,6 +217,28 @@
                         text: error,
                         icon: "error"
                     });
+                }
+            });
+        }
+
+        // Observable array for dropdown options
+        self.consoles = ko.observableArray([]);
+
+        // Observable for the selected option
+        self.selectedOption = ko.observable();
+
+        GetConsoles();
+
+        function GetConsoles() {
+            $.ajax({
+                type: "GET",
+                url: "https://localhost:44300/console",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (data) {
+                    self.consoles(data);
+                },
+                error: function (error) {
                 }
             });
         }
