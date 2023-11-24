@@ -1,0 +1,191 @@
+﻿@{
+    ViewData["Title"] = "Games";
+}
+
+<head>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/lib/knockout/build/output/knockout-latest.js"></script>
+    <script src="~/lib/sweetalert2/dist/sweetalert2.all.min.js"></script>
+</head>
+<body>
+    <button type="button" class="btn btn-success" data-bind="click: showForm">Add</button>
+    <table id="addTable" style="display:none">
+        <tr>
+            <td>
+                <table id="tbldml" class="table">
+                    <tr>
+                        <td>Name</td>
+                        <td><input type="text" class="form-control" id="txtName" data-bind="value: Name" /></td>
+                        <td><button type="button" class="btn btn-primary" data-bind="click: save">Confirm</button></td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+
+    <div class="FixedContainer">
+        <table class="table table-striped">
+            <thead class="thead-dark">
+                <tr>
+                    <td scope="col" data-bind="value: Id">ID</td>
+                    <td scope="col" data-bind="value: Name">Name</td>
+                    <td></td>
+                </tr>
+            </thead>
+            <tbody data-bind="foreach: Games">
+                <tr>
+                    <td data-bind="text: id"></td>
+                    <td data-bind="text: name"></td>
+                    <td><button type="button" class="btn btn-success" data-bind="click:  $parent.update">Update</button></td>
+                    <td><button type="button" class="btn btn-danger" data-bind="click:  $parent.delete">Delete</button></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+
+<script type="text/javascript">
+    var ConsoleViewModel = function () {
+        var self = this;
+
+        self.Id = ko.observable("0");
+        self.Name = ko.observable("");
+
+        self.Games = ko.observableArray([]);
+
+        GetGames();
+
+        self.showForm = function () {
+            $('#addTable').toggle();
+        }
+
+        self.save = function () {
+            var consoleData = {
+                name: self.Name(),
+            };
+            $.ajax({
+                type: "POST",
+                url: "https://localhost:44300/console",
+                data: ko.toJSON(consoleData),
+                contentType: "application/json",
+                success: function (data) {
+                    Swal.fire({
+                        title: "Good job!",
+                        text: "Console added!",
+                        icon: "success"
+                    });
+                    GetGames();
+                },
+                error: function (data) {
+                    Swal.fire({
+                        title: "Error!",
+                        text: data.responseJSON.Name,
+                        icon: "error"
+                    });
+                }
+            });
+        };
+
+        self.update = function (consoleModel) {
+
+            var name = consoleModel.name;
+
+            Swal.fire({
+                title: 'Update Console',
+                html: '<input id="name" class="swal2-input"  value =' + name + '>',
+
+                preConfirm: function () {
+                    return new Promise(function (resolve) {
+                        resolve([
+                            consoleModel.id,
+                            $('#name').val()
+                        ])
+                    })
+                },
+            }).then(function (result) {
+                var consoleData = {
+                    id: result.value[0],
+                    name: result.value[1],
+                };
+                $.ajax({
+                    type: "PUT",
+                    url: "https://localhost:44300/console",
+                    data: ko.toJSON(consoleData),
+                    contentType: "application/json",
+                    success: function (data) {
+                        Swal.fire({
+                            title: "Good job!",
+                            text: "Console updated!",
+                            icon: "success"
+                        });
+                        GetConsoles();
+                    },
+                    error: function (data) {
+                        Swal.fire({
+                            title: "Error!",
+                            text: data.responseJSON.Name,
+                            icon: "error"
+                        });
+                    }
+                });
+            })
+        };
+
+        self.delete = function (consoleModel) {
+
+            Swal.fire({
+                title: "Do you really want delete?",
+                icon: "warning",
+                showDenyButton: true,
+                confirmButtonText: "Yes",
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        type: "DELETE",
+                        url: "https://localhost:44300/console/" + consoleModel.id,
+                        success: function (data) {
+                            Swal.fire({
+                                title: "Good job!",
+                                text: "Console removed!",
+                                icon: "success"
+                            });
+                            GetConsoles();
+                        },
+                        error: function (error) {
+                            Swal.fire({
+                                title: "Error!",
+                                text: error,
+                                icon: "error"
+                            });
+                        }
+                    });
+                }
+            });
+        };
+
+
+        function GetGames() {
+            $.ajax({
+                type: "GET",
+                url: "https://localhost:44300/game",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (data) {
+                    self.Games(data);
+                },
+                error: function (error) {
+                    Swal.fire({
+                        title: "Error!",
+                        text: error,
+                        icon: "error"
+                    });
+                }
+            });
+        }
+    };
+    ko.applyBindings(new ConsoleViewModel());
+</script>
+
+
