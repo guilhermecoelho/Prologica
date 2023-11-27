@@ -13,5 +13,5 @@ public partial class Game
 
     public double? Price { get; set; }
 
-    public Console? Console { get; set; }
+    public virtual Console Console { get; set; } = null!;
 }

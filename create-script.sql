@@ -28,7 +28,11 @@ CREATE TABLE IF NOT EXISTS public."Games"
     "ConsoleId" integer NOT NULL,
     "Name" text COLLATE pg_catalog."default" NOT NULL,
     "Price" double precision,
-    CONSTRAINT "Games_pkey" PRIMARY KEY ("Id")
+    CONSTRAINT "Games_pkey" PRIMARY KEY ("Id"),
+    CONSTRAINT "Game_Console_gkey" FOREIGN KEY ("ConsoleId")
+        REFERENCES public."Consoles" ("Id") MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
 )
 
 TABLESPACE pg_default;
